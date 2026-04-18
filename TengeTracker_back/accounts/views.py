@@ -45,3 +45,26 @@ def logout(request):
 @permission_classes([IsAuthenticated])
 def test_auth(request):
     return Response({"message": "You are authenticated"})
+
+#bota 
+from rest_framework import generics
+from .models import Transaction
+from .serializers import TransactionSerializer
+
+class TransactionListView(generics.ListAPIView):
+    serializer_class = TransactionSerializer
+
+    def get_queryset(self):
+        queryset = Transaction.objects.all()
+
+        category = self.request.GET.get('category')
+        if category:
+            queryset = queryset.filter(category__name=category)
+
+        order = self.request.GET.get('order')
+        if order == 'desc':
+            queryset = queryset.order_by('-amount')
+        elif order == 'asc':
+            queryset = queryset.order_by('amount')
+
+        return queryset
