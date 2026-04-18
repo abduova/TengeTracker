@@ -1,3 +1,5 @@
+from unicodedata import category
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
@@ -50,13 +52,14 @@ def test_auth(request):
 from rest_framework import generics
 from .models import Transaction
 from .serializers import TransactionSerializer
+from rest_framework.permissions import IsAuthenticated
 
 class TransactionListView(generics.ListAPIView):
     serializer_class = TransactionSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Transaction.objects.all()
+        queryset = Transaction.objects.filter(user=self.request.user)
 
         category = self.request.GET.get('category')
         if category:
@@ -68,4 +71,54 @@ class TransactionListView(generics.ListAPIView):
         elif order == 'asc':
             queryset = queryset.order_by('amount')
 
-        return queryset
+    # ФИЛЬТР ПО ДАТЕ
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+
+        if start_date:
+            queryset = queryset.filter(created_at__date__gte=start_date)
+
+        if end_date:
+            queryset = queryset.filter(created_at__date__lte=end_date)
+        
+    # ФИЛЬТР ПО СУММЕ
+        min_amount = self.request.GET.get('min_amount')
+        max_amount = self.request.GET.get('max_amount')
+
+        if min_amount:
+            queryset = queryset.filter(amount__gte=min_amount)
+
+        if max_amount:
+            queryset = queryset.filter(amount__lte=max_amount)
+
+
+        return queryset 
+    
+
+class TransactionCreateView(generics.CreateAPIView):
+    queryset = Transaction.objects.all()
+    serializer_class = TransactionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    
+class TransactionDeleteView(generics.DestroyAPIView):
+    serializer_class = TransactionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Transaction.objects.filter(user=self.request.user)
+    
+
+class TransactionUpdateView(generics.UpdateAPIView):
+    serializer_class = TransactionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Transaction.objects.filter(user=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save()
+        

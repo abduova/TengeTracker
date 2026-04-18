@@ -36,9 +36,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 #bota 
 from .models import Transaction
 class TransactionSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     category_name = serializers.CharField(source='category.name', read_only=True)
     wallet_name = serializers.CharField(source='wallet.name', read_only=True)
 
     class Meta:
         model = Transaction
         fields = '__all__'
+        
