@@ -53,6 +53,7 @@ from rest_framework import generics
 from .models import Transaction
 from .serializers import TransactionSerializer
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Sum
 
 class TransactionListView(generics.ListAPIView):
     serializer_class = TransactionSerializer
@@ -121,4 +122,31 @@ class TransactionUpdateView(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         serializer.save()
+        
+        
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_balance(request):
+    user = request.user
+
+    # считаем доходы
+    income = Transaction.objects.filter(
+        user=user,
+        type='income'
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    # считаем расходы
+    expense = Transaction.objects.filter(
+        user=user,
+        type='expense'
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    # считаем баланс
+    balance = income - expense
+
+    return Response({
+        "income": income,
+        "expense": expense,
+        "balance": balance
+    })
         
