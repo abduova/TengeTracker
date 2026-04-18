@@ -10,6 +10,7 @@ class Wallet(models.Model):
     def __str__(self):
         return self.name
 
+
 class Category(models.Model):
     TYPE_CHOICES = (
         ('income', 'Income'),
@@ -25,3 +26,15 @@ class Category(models.Model):
     class Meta:
         verbose_name = "Category"
         verbose_name_plural = "Categories"
+        
+class Transaction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+
+    amount = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.amount} - {self.category.name}"
