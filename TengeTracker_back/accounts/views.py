@@ -53,6 +53,7 @@ from .serializers import TransactionSerializer
 
 class TransactionListView(generics.ListAPIView):
     serializer_class = TransactionSerializer
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         queryset = Transaction.objects.all()
