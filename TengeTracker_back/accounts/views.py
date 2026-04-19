@@ -168,6 +168,36 @@ def category_summary(request):
     )
 
     return Response(data)
+# ДОХОДЫ ПО КАТЕГОРИЯМ
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def income_summary(request):
+    user = request.user
+
+    data = (
+        Transaction.objects
+        .filter(user=user, type='income')
+        .values('category__name')
+        .annotate(total=Sum('amount'))
+    )
+
+    return Response(data)
+
+
+# БАЛАНС ПО КОШЕЛЬКАМ
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def wallet_summary(request):
+    user = request.user
+
+    data = (
+        Transaction.objects
+        .filter(user=user)
+        .values('wallet__name')
+        .annotate(total=Sum('amount'))
+    )
+
+    return Response(data)
     
     # ПРОСТОЙ ТЕСТ API
 @api_view(['GET'])
