@@ -71,6 +71,11 @@ class TransactionListView(generics.ListAPIView):
             queryset = queryset.order_by('-amount')
         elif order == 'asc':
             queryset = queryset.order_by('amount')
+        # ФИЛЬТР ПО ТИПУ (доход / расход)
+        type_filter = self.request.GET.get('type')
+
+        if type_filter:
+            queryset = queryset.filter(type=type_filter)
 
     # ФИЛЬТР ПО ДАТЕ
         start_date = self.request.GET.get('start_date')
@@ -149,6 +154,20 @@ def get_balance(request):
         "expense": expense,
         "balance": balance
     })
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def category_summary(request):
+    user = request.user
+
+    data = (
+        Transaction.objects
+        .filter(user=user, type='expense')
+        .values('category__name')
+        .annotate(total=Sum('amount'))
+    )
+
+    return Response(data)
     
     # ПРОСТОЙ ТЕСТ API
 @api_view(['GET'])
