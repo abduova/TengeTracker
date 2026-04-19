@@ -1,11 +1,11 @@
 from unicodedata import category
-
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializers import RegisterSerializer
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -149,4 +149,16 @@ def get_balance(request):
         "expense": expense,
         "balance": balance
     })
-        
+    
+    # ПРОСТОЙ ТЕСТ API
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def test_api(request):
+    return Response({"message": "API is working"})
+
+
+# СТАТУС СЕРВЕРА
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def status_api(request):
+    return Response({"status": "OK"})

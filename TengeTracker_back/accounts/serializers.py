@@ -44,3 +44,16 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = '__all__'
         
+        
+from rest_framework import serializers
+
+# ДЛЯ БАЛАНСА
+class BalanceSerializer(serializers.Serializer):
+    income = serializers.FloatField()
+    expense = serializers.FloatField()
+    balance = serializers.FloatField()
+
+
+# ПРОСТОЙ ТЕСТОВЫЙ SERIALIZER
+class MessageSerializer(serializers.Serializer):
+    message = serializers.CharField()
