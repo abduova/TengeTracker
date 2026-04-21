@@ -6,6 +6,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.db.models import Sum
+from rest_framework.views import APIView
 
 from .models import Wallet, Category, Transaction
 from .serializers import (
