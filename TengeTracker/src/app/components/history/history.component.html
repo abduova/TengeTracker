@@ -1,0 +1,133 @@
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-tt small">TT</div>
+      <div>
+        <div class="brand-title">Tenge Tracker</div>
+        <div class="brand-sub">Hi, {{ username || 'there' }}</div>
+      </div>
+    </div>
+    <nav class="topnav">
+      <a routerLink="/dashboard" class="nav-link">Dashboard</a>
+      <a routerLink="/history" class="nav-link active">History</a>
+      <button class="btn-ghost btn-sm" (click)="logout()">Logout</button>
+    </nav>
+  </header>
+
+  <section class="panel filter-panel">
+    <h3 class="sec-title">Filters</h3>
+    <div class="filter-grid">
+
+      <div class="field">
+        <label class="label">Type</label>
+        <select class="select" [(ngModel)]="filters.type">
+          <option value="">All</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="label">Wallet</label>
+        <select class="select" [(ngModel)]="filters.wallet">
+          <option value="">Any</option>
+          @for (w of wallets(); track w.id) {
+            <option [value]="w.name">{{ w.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="label">Category</label>
+        <select class="select" [(ngModel)]="filters.category">
+          <option value="">Any</option>
+          @for (c of categories(); track c.id) {
+            <option [value]="c.name">{{ c.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="label">Start date</label>
+        <input class="input" type="date" [(ngModel)]="filters.start_date" />
+      </div>
+
+      <div class="field">
+        <label class="label">End date</label>
+        <input class="input" type="date" [(ngModel)]="filters.end_date" />
+      </div>
+
+      <div class="field">
+        <label class="label">Min amount</label>
+        <input class="input" type="number" [(ngModel)]="filters.min_amount" />
+      </div>
+
+      <div class="field">
+        <label class="label">Max amount</label>
+        <input class="input" type="number" [(ngModel)]="filters.max_amount" />
+      </div>
+
+      <div class="field">
+        <label class="label">Order</label>
+        <select class="select" [(ngModel)]="filters.order">
+          <option value="desc">Newest first</option>
+          <option value="asc">Oldest first</option>
+        </select>
+      </div>
+
+    </div>
+    <div class="filter-actions">
+      <button class="btn-ghost" (click)="reset()">Reset</button>
+      <button class="btn" (click)="search()">Apply filters</button>
+    </div>
+  </section>
+
+  <section class="summary">
+
+    <div class="summary-card income">
+      <div class="summary-label">Filtered Income</div>
+      <div class="summary-value">₸ {{ totalIncome() | number:'1.0-0' }}</div>
+    </div>
+
+    <div class="summary-card expense">
+      <div class="summary-label">Filtered Expense</div>
+      <div class="summary-value">₸ {{ totalExpense() | number:'1.0-0' }}</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">Shown</div>
+      <div class="summary-value">{{ transactions().length }}</div>
+    </div>
+
+  </section>
+
+  <section class="panel tx-panel">
+    
+    <h3 class="sec-title">Transactions</h3>
+    @if (loading()) {
+      <div class="empty">Loading…</div>
+    } @else {
+      @for (t of transactions(); track t.id) {
+        <div class="tx-row" [class.income]="t.type === 'income'" [class.expense]="t.type === 'expense'">
+          <img class="tx-icon" [src]="iconPath(t.category_icon)" [alt]="t.category_name || ''" />
+          <div class="tx-body">
+            <div class="tx-title">
+              {{ t.category_name }}
+              <span class="tx-wallet">· {{ t.wallet_name }}</span>
+            </div>
+            <div class="tx-desc">
+              {{ t.description || '—' }}
+              <span class="tx-date">{{ t.created_at | date:'medium' }}</span>
+            </div>
+          </div>
+          <div class="tx-amount" [class.pos]="t.type === 'income'" [class.neg]="t.type === 'expense'">
+            {{ t.type === 'income' ? '+' : '-' }} ₸ {{ t.amount | number:'1.0-0' }}
+          </div>
+          <button class="icon-btn" (click)="deleteTx(t)" title="Delete">×</button>
+        </div>
+      } @empty {
+        <div class="empty">No transactions match your filters.</div>
+      }
+    }
+  </section>
+</div>
