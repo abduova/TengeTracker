@@ -11,6 +11,5 @@ TengeTracker is a personal budget and expense tracker web app designed to help u
 ##  Main Features
 
 - Record, view, edit and delete income and expenses    
-- Set spending limits for different categories  
 - Monitor financial habits  
 - Manage multiple money sources (cash, bank accounts, digital wallets).
