@@ -1,0 +1,31 @@
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="logo-tt">TT</div>
+    <h1 class="auth-title">Tenge Tracker</h1>
+    <p class="auth-sub">Sign in to track your money</p>
+
+    @if (error) {
+      <div class="form-err">{{ error }}</div>
+    }
+
+    <form (ngSubmit)="submit()">
+      <div class="field">
+        <label class="label">Username</label>
+        <input class="input" type="text" name="username" [(ngModel)]="username"  />
+      </div>
+
+      <div class="field">
+        <label class="label">Password</label>
+        <input class="input" type="password" name="password" [(ngModel)]="password" />
+      </div>
+
+      <button class="btn" type="submit" style="width:100%" [disabled]="loading">
+        {{ loading ? 'Signing in…' : 'Sign in' }}
+      </button>
+    </form>
+
+    <div class="auth-foot">
+      Don't have an account? <a routerLink="/register">Create one</a>
+    </div>
+  </div>
+</div>
