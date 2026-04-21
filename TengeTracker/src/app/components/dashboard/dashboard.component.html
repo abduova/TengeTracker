@@ -1,0 +1,222 @@
+<div class="shell">
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-tt small">TT</div>
+      <div>
+        <div class="brand-title">Tenge Tracker</div>
+        <div class="brand-sub">Hi, {{ username || 'there' }}</div>
+      </div>
+    </div>
+    <nav class="topnav">
+      <a routerLink="/dashboard" class="nav-link active">Dashboard</a>
+      <a routerLink="/history" class="nav-link">History</a>
+      <button class="btn-ghost btn-sm" (click)="logout()">Logout</button>
+    </nav>
+  </header>
+
+  <!-- Balance summary -->
+  <section class="summary">
+    <div class="summary-card">
+      <div class="summary-label">Total Balance</div>
+      <div class="summary-value">₸ {{ balance().balance | number:'1.0-0' }}</div>
+    </div>
+    <div class="summary-card income">
+      <div class="summary-label">Total Income</div>
+      <div class="summary-value">₸ {{ balance().income | number:'1.0-0' }}</div>
+    </div>
+    <div class="summary-card expense">
+      <div class="summary-label">Total Expense</div>
+      <div class="summary-value">₸ {{ balance().expense | number:'1.0-0' }}</div>
+    </div>
+  </section>
+
+  <section class="columns">
+    <!-- Income -->
+    <div class="col panel">
+      <div class="col-head">
+        <h3>Income</h3>
+        <div class="col-actions">
+          <button class="btn btn-sm" (click)="openTx('income')">+ Add income</button>
+          <button class="btn-ghost btn-sm" (click)="openIncomeCat()">+ Category</button>
+        </div>
+      </div>
+      <div class="items">
+        @for (c of incomeCats(); track c.id) {
+          <div class="item" [style.--accent]="c.color || '#22c55e'">
+            <img class="item-icon" [src]="iconPath(c.icon)" [alt]="c.name" />
+            <div class="item-body">
+              <div class="item-name">{{ c.name }}</div>
+              <div class="item-amount pos">+ ₸ {{ findIncomeTotal(c.name) | number:'1.0-0' }}</div>
+            </div>
+            <button class="icon-btn" (click)="deleteIncomeCat(c)" title="Delete">×</button>
+          </div>
+        } @empty {
+          <div class="empty">No income categories yet. Add one to get started.</div>
+        }
+      </div>
+    </div>
+
+    <!--Walletes-->
+    <div class="col panel">
+      <div class="col-head">
+        <h3>Accounts</h3>
+        <div class="col-actions">
+          <button class="btn btn-sm" (click)="openWallet()">+ Add wallet</button>
+        </div>
+      </div>
+      <div class="items">
+        @for (w of wallets(); track w.id) {
+          <div class="item" [style.--accent]="w.color || '#3b82f6'">
+            <img class="item-icon" [src]="iconPath(w.icon)" [alt]="w.name" />
+            <div class="item-body">
+              <div class="item-name">{{ w.name }}</div>
+              <div class="item-amount">₸ {{ w.balance | number:'1.0-0' }}</div>
+            </div>
+            <button class="icon-btn" (click)="deleteWallet(w)" title="Delete">×</button>
+          </div>
+        } @empty {
+          <div class="empty">No wallets yet. Add one to track balances.</div>
+        }
+      </div>
+    </div>
+
+    <!-- Expense -->
+    <div class="col panel">
+      <div class="col-head">
+        <h3>Expenses</h3>
+        <div class="col-actions">
+          <button class="btn btn-sm" (click)="openTx('expense')">+ Add expense</button>
+          <button class="btn-ghost btn-sm" (click)="openExpenseCat()">+ Category</button>
+        </div>
+      </div>
+      <div class="items">
+        @for (c of expenseCats(); track c.id) {
+          <div class="item" [style.--accent]="c.color || '#ef4444'">
+            <img class="item-icon" [src]="iconPath(c.icon)" [alt]="c.name" />
+            <div class="item-body">
+              <div class="item-name">{{ c.name }}</div>
+              <div class="item-amount neg">- ₸ {{ findExpenseTotal(c.name) | number:'1.0-0' }}</div>
+            </div>
+            <button class="icon-btn" (click)="deleteExpenseCat(c)" title="Delete">×</button>
+          </div>
+        } @empty {
+          <div class="empty">No expense categories yet. Add one to track spending.</div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Modals -->
+  @if (modal() === 'wallet') {
+    <div class="modal-backdrop" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <h3>New wallet</h3>
+          <button class="icon-btn" (click)="closeModal()">×</button>
+        </div>
+        <div class="field"><label class="label">Name</label>
+          <input class="input" [(ngModel)]="walletName" placeholder="Cash, Kaspi, …" />
+        </div>
+        <div class="field">
+          <label class="label">Icon</label>
+          <div class="icon-grid">
+            @for (i of icons; track i.key) {
+              <button type="button"
+                      class="icon-chip"
+                      [class.sel]="walletIcon === i.key"
+                      (click)="walletIcon = i.key">
+                <img [src]="'icons/' + i.file" [alt]="i.label" />
+              </button>
+            }
+          </div>
+        </div>
+        <div class="field"><label class="label">Color</label>
+          <input class="input" type="color" [(ngModel)]="walletColor" style="padding:4px; height:40px;" />
+        </div>
+        <div class="modal-foot">
+          <button class="btn-ghost" (click)="closeModal()">Cancel</button>
+          <button class="btn" (click)="saveWallet()">Save</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (modal() === 'income' || modal() === 'expense') {
+    <div class="modal-backdrop" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <h3>New {{ categoryType }} category</h3>
+          <button class="icon-btn" (click)="closeModal()">×</button>
+        </div>
+        <div class="field"><label class="label">Name</label>
+          <input class="input" [(ngModel)]="categoryName" placeholder="e.g. Salary, Food" />
+        </div>
+        <div class="field">
+          <label class="label">Icon</label>
+          <div class="icon-grid">
+            @for (i of icons; track i.key) {
+              <button type="button"
+                      class="icon-chip"
+                      [class.sel]="categoryIcon === i.key"
+                      (click)="categoryIcon = i.key">
+                <img [src]="'icons/' + i.file" [alt]="i.label" />
+              </button>
+            }
+          </div>
+        </div>
+        <div class="field"><label class="label">Color</label>
+          <input class="input" type="color" [(ngModel)]="categoryColor" style="padding:4px; height:40px;" />
+        </div>
+        <div class="modal-foot">
+          <button class="btn-ghost" (click)="closeModal()">Cancel</button>
+          <button class="btn" (click)="saveCategory()">Save</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (modal() === 'tx') {
+    <div class="modal-backdrop" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <h3>New {{ txType }}</h3>
+          <button class="icon-btn" (click)="closeModal()">×</button>
+        </div>
+        @if (txError()) {
+          <div class="form-err">{{ txError() }}</div>
+        }
+        <div class="field"><label class="label">Amount (₸)</label>
+          <input class="input" type="number" [(ngModel)]="txAmount" />
+        </div>
+        <div class="field"><label class="label">Wallet</label>
+          <select class="select" [(ngModel)]="txWallet">
+            @for (w of wallets(); track w.id) {
+              <option [ngValue]="w.id">{{ w.name }} (₸ {{ w.balance | number:'1.0-0' }})</option>
+            }
+          </select>
+        </div>
+        <div class="field"><label class="label">Category</label>
+          <select class="select" [(ngModel)]="txCategory">
+            @if (txType === 'income') {
+              @for (c of incomeCats(); track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
+            } @else {
+              @for (c of expenseCats(); track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
+            }
+          </select>
+        </div>
+        <div class="field"><label class="label">Description (optional)</label>
+          <input class="input" [(ngModel)]="txDescription" />
+        </div>
+        <div class="modal-foot">
+          <button class="btn-ghost" (click)="closeModal()">Cancel</button>
+          <button class="btn" (click)="saveTx()">Save</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
