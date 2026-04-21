@@ -276,3 +276,25 @@ def test_api(request):
 @permission_classes([AllowAny])
 def status_api(request):
     return Response({"status": "OK"})
+
+
+# SIMPLE APIVIEW (for requirement)
+
+class SimpleAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+            "message": "This is APIView",
+            "user": request.user.username
+        })
+
+
+class SecondAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return Response({
+            "status": "Second APIView works"
+        })
+

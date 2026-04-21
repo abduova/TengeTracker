@@ -1,4 +1,5 @@
 from django.urls import path
+from .views import SimpleAPIView, SecondAPIView
 from .views import (
     register, login, logout, test_auth, me_view,
     TransactionListView, TransactionCreateView,
@@ -38,4 +39,8 @@ urlpatterns = [
     # --- Health ---
     path('test/', test_api),
     path('status/', status_api),
+    
+    
+    path('simple-api/', SimpleAPIView.as_view()),
+    path('second-api/', SecondAPIView.as_view()),
 ]
