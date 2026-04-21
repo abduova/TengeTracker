@@ -1,0 +1,64 @@
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="logo-tt">TT</div>
+    <h1 class="auth-title">Create account</h1>
+    <p class="auth-sub">Start tracking your Tenge</p>
+
+    <div *ngIf="generalError" class="form-err">
+      {{ generalError }}
+    </div>
+
+    <form (ngSubmit)="submit()">
+
+      <div class="field">
+        <label class="label">Username</label>
+        <input class="input" type="text"
+               [(ngModel)]="username"
+               name="username" />
+
+        <div *ngIf="errors.username" class="form-err">
+          {{ errors.username }}
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Email</label>
+        <input class="input" type="email"
+               [(ngModel)]="email"
+               name="email" />
+
+        <div *ngIf="errors.email" class="form-err">
+          {{ errors.email }}
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Password</label>
+        <input class="input" type="password"
+               [(ngModel)]="password"
+               name="password" />
+
+        <div *ngIf="errors.password" class="form-err">
+          {{ errors.password }}
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Confirm password</label>
+        <input class="input" type="password"
+               [(ngModel)]="confirm"
+               name="confirm" />
+      </div>
+
+      <button class="btn" type="submit" [disabled]="loading">
+        {{ loading ? 'Creating...' : 'Create account' }}
+      </button>
+
+    </form>
+
+    <div class="auth-foot">
+      Already have an account?
+      <a routerLink="/login">Sign in</a>
+    </div>
+  </div>
+</div>
